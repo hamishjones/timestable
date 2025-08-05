@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Times Table Flash Cards</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: #f9f9f9;
+    }
+
+    .card {
+      font-size: 2rem;
+      padding: 2rem;
+      border: 3px solid #333;
+      border-radius: 1rem;
+      margin-bottom: 1rem;
+      width: 300px;
+      text-align: center;
+      cursor: pointer;
+      background-color: white;
+    }
+
+    .controls {
+      display: flex;
+      gap: 1rem;
+    }
+
+    button {
+      padding: 1rem 2rem;
+      font-size: 1rem;
+    }
+
+    .settings {
+      margin-bottom: 2rem;
+    }
+
+    select {
+      font-size: 1rem;
+      padding: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="settings">
+    <label for="table">Choose table:</label>
+    <select id="table">
+      <option value="random">Random</option>
+      <!-- Dynamically add 1–12 below -->
+    </select>
+  </div>
+
+  <div class="card" id="flashcard">Click to reveal</div>
+
+  <div class="controls">
+    <button onclick="prevCard()">Previous</button>
+    <button onclick="nextCard()">Next</button>
+  </div>
+
+  <script>
+    const flashcard = document.getElementById('flashcard');
+    const tableSelector = document.getElementById('table');
+
+    let cards = [];
+    let currentIndex = 0;
+    let showingAnswer = false;
+
+    // Populate select with 1–12
+    for (let i = 1; i <= 12; i++) {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.text = i;
+      tableSelector.appendChild(opt);
+    }
+
+    tableSelector.addEventListener('change', generateCards);
+
+    function generateCards() {
+      const selected = tableSelector.value;
+      cards = [];
+
+      if (selected === 'random') {
+        for (let i = 1; i <= 12; i++) {
+          for (let j = 1; j <= 12; j++) {
+            cards.push({ q: `${i} × ${j}`, a: i * j });
+          }
+        }
+      } else {
+        const base = parseInt(selected);
+        for (let i = 1; i <= 12; i++) {
+          cards.push({ q: `${base} × ${i}`, a: base * i });
+        }
+      }
+
+      shuffle(cards);
+      currentIndex = 0;
+      showingAnswer = false;
+      showCard();
+    }
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+    }
+
+    function showCard() {
+      if (!cards.length) return;
+      const current = cards[currentIndex];
+      flashcard.textContent = showingAnswer ? `${current.q} = ${current.a}` : current.q;
+    }
+
+    flashcard.addEventListener('click', () => {
+      showingAnswer = !showingAnswer;
+      showCard();
+    });
+
+    function nextCard() {
+      currentIndex = (currentIndex + 1) % cards.length;
+      showingAnswer = false;
+      showCard();
+    }
+
+    function prevCard() {
+      currentIndex = (currentIndex - 1 + cards.length) % cards.length;
+      showingAnswer = false;
+      showCard();
+    }
+
+    // Start with random
+    generateCards();
+  </script>
+
+</body>
+</html>
