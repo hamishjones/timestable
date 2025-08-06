@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Multiplication Quiz</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f4f8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    h1 {
+      margin-bottom: 0.5rem;
+    }
+
+    .settings {
+      margin-bottom: 1rem;
+      display: flex;
+      gap: 1rem;
+    }
+
+    select, button {
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .quiz-box {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 2rem;
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    .question {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .choices button {
+      display: block;
+      width: 100%;
+      margin: 0.5rem 0;
+      padding: 0.75rem;
+      font-size: 1.2rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      background: #eef;
+      cursor: pointer;
+    }
+
+    .choices button:hover {
+      background: #dde;
+    }
+
+    .timer {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: #444;
+    }
+
+    .result {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: green;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Multiplication Quiz</h1>
+  <div class="settings">
+    <label>
+      Max Table:
+      <select id="max">
+        <option value="12">Up to 12</option>
+        <option value="20">Up to 20</option>
+      </select>
+    </label>
+    <button onclick="startQuiz()">Start Quiz</button>
+  </div>
+
+  <div class="quiz-box" id="quizBox" style="display:none;">
+    <div class="timer" id="timer">⏱ Time left: 60s</div>
+    <div class="question" id="question">3 × 7 = ?</div>
+    <div class="choices" id="choices"></div>
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    const maxSelector = document.getElementById("max");
+    const quizBox = document.getElementById("quizBox");
+    const questionEl = document.getElementById("question");
+    const choicesEl = document.getElementById("choices");
+    const timerEl = document.getElementById("timer");
+    const resultEl = document.getElementById("result");
+
+    let questions = [];
+    let currentQuestion = 0;
+    let score = 0;
+    let timeLeft = 60;
+    let timer;
+
+    function startQuiz() {
+      score = 0;
+      currentQuestion = 0;
+      timeLeft = 60;
+      resultEl.textContent = "";
+      const max = parseInt(maxSelector.value);
+      generateQuestions(max);
+      quizBox.style.display = "block";
+      showQuestion();
+      clearInterval(timer);
+      timer = setInterval(() => {
+        timeLeft--;
+        timerEl.textContent = `⏱ Time left: ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          endQuiz();
+        }
+      }, 1000);
+    }
+
+    function generateQuestions(max) {
+      questions = [];
+      for (let i = 0; i < 10; i++) {
+        const a = rand(1, max);
+        const b = rand(1, max);
+        const answer = a * b;
+
+        const options = new Set();
+        options.add(answer);
+        while (options.size < 4) {
+          options.add(rand(1, max * max));
+        }
+
+        const shuffled = Array.from(options).sort(() => Math.random() - 0.5);
+
+        questions.push({
+          q: `${a} × ${b}`,
+          correct: answer,
+          choices: shuffled
+        });
+      }
+    }
+
+    function showQuestion() {
+      if (currentQuestion >= questions.length) {
+        endQuiz();
+        return;
+      }
+
+      const q = questions[currentQuestion];
+      questionEl.textContent = `${q.q} = ?`;
+      choicesEl.innerHTML = "";
+
+      q.choices.forEach(choice => {
+        const btn = document.createElement("button");
+        btn.textContent = choice;
+        btn.onclick = () => {
+          if (choice === q.correct) score++;
+          currentQuestion++;
+          showQuestion();
+        };
+        choicesEl.appendChild(btn);
+      });
+    }
+
+    function endQuiz() {
+      clearInterval(timer);
+      questionEl.textContent = "Quiz Finished!";
+      choicesEl.innerHTML = "";
+      timerEl.textContent = "";
+      resultEl.textContent = `✅ You got ${score} out of 10 correct`;
+    }
+
+    function rand(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+  </script>
+
+</body>
+</html>
