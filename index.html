@@ -25,6 +25,10 @@
 
     .settings {
       margin-bottom: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
     }
 
     select {
@@ -100,14 +104,24 @@
 
   <p class="instructions">
     👇 Click the card to flip it. Use the buttons to go forward or back.<br>
-    Choose a specific table or select "Random" for variety.
+    Select a times table and max range (12 or 20) to begin.
   </p>
 
   <div class="settings">
-    <label for="table">Choose table:</label>
-    <select id="table">
-      <option value="random">Random</option>
-    </select>
+    <label>
+      Choose table:
+      <select id="table">
+        <option value="random">Random</option>
+      </select>
+    </label>
+
+    <label>
+      Max table:
+      <select id="max">
+        <option value="12">Up to 12</option>
+        <option value="20">Up to 20</option>
+      </select>
+    </label>
   </div>
 
   <div class="card-container">
@@ -124,14 +138,16 @@
 
   <script>
     const tableSelector = document.getElementById('table');
+    const maxSelector = document.getElementById('max');
     const card = document.getElementById('flashcard');
     const front = document.getElementById('card-front');
     const back = document.getElementById('card-back');
 
     let cards = [];
     let currentIndex = 0;
+    let maxTable = 12;
 
-    // Populate dropdown from 1 to 20
+    // Populate table dropdown (1–20)
     for (let i = 1; i <= 20; i++) {
       const opt = document.createElement('option');
       opt.value = i;
@@ -140,6 +156,10 @@
     }
 
     tableSelector.addEventListener('change', generateCards);
+    maxSelector.addEventListener('change', () => {
+      maxTable = parseInt(maxSelector.value);
+      generateCards();
+    });
 
     function generateCards() {
       const selected = tableSelector.value;
@@ -147,13 +167,13 @@
 
       if (selected === 'random') {
         for (let i = 1; i <= 20; i++) {
-          for (let j = 1; j <= 20; j++) {
+          for (let j = 1; j <= maxTable; j++) {
             cards.push({ q: `${i} × ${j}`, a: i * j });
           }
         }
       } else {
         const base = parseInt(selected);
-        for (let i = 1; i <= 20; i++) {
+        for (let i = 1; i <= maxTable; i++) {
           cards.push({ q: `${base} × ${i}`, a: base * i });
         }
       }
@@ -198,7 +218,7 @@
       card.classList.remove('flipped');
     }
 
-    // Start with random
+    // Init with random × 12
     generateCards();
   </script>
 
